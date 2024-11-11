@@ -6,11 +6,11 @@ library(data.table) #Importar e salvar tabelas
 
 #Crie uma conta no SpeciesLink: https://specieslink.net/
 #Acesse sua chave: https://specieslink.net/aut/profile/apikeys
-my_key <- "eANSwxUgXoO6tUEqIKSV"
+my_key <- ""
 
 # DICA: CRIE UM OBJETO COM O NOME DA ESPÉCIE!
 # Esse objeto sera usado para criar pastas e baixar as ocorrências
-sp <- "Hemitriccus kaempferi"
+sp <- "Araucaria angustifolia"
 
 #Criar diretório para salvar ocorrencias do specieslink
 sp_dir <- file.path("Ocorrencias", sp)

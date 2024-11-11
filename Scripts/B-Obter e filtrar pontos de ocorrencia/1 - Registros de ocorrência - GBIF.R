@@ -13,7 +13,7 @@ library(data.table) #Importar e salvar tabelas
 
 # DICA: CRIE UM OBJETO COM O NOME DA ESPÉCIE!
 # Esse objeto sera usado para criar pastas e baixar as ocorrências
-sp <- "Hemitriccus kaempferi"
+sp <- "Araucaria angustifolia"
 
 # Checar chave (key) da espécie no gbif
 sp_info <- name_backbone(name = sp,
@@ -29,9 +29,9 @@ n_occ_with_coordinates <- rgbif::occ_count(taxonKey = k,
 n_occ_with_coordinates
 
 #Fazer download com GBIF
-user = "wevertonf1993" #Username de registro no gbif
-pwd <- "nene1993" #Senha
-email = "wevertonf1993@hotmail.com" #Email
+user = "" #Username de registro no gbif
+pwd <- "" #Senha
+email = "" #Email
 
 occ_request <- occ_download(
   pred_in("taxonKey", k),

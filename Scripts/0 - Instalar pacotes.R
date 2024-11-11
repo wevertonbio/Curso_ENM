@@ -25,6 +25,7 @@ if (!require(rpaleoclim)) install.packages("rpaleoclim")
 if (!require(fs)) install.packages("fs")
 if (!require(remotes)) install.packages("remotes")
 if (!require(devtools)) install.packages("devtools")
+if (!require(usdm)) install.packages("usdm")
 
 # Instalar pacotes do github
 # Em todos eles, pode selecionar opção 3 se pedir
@@ -77,3 +78,4 @@ library(fs)
 library(devtools)
 library(factoextra)
 library(kuenm2)
+library(usdm)
