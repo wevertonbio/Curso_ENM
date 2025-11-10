@@ -18,7 +18,7 @@
 # Reference: http://onlinelibrary.wiley.com/doi/10.1111/ecog.02880/full
 
 # Variáveis bioclimáticas do passado
-# CHELSA: https://chelsa-climate.org/paleo-climate/
+# CHELSA: https://chelsa-climate.org/chelsa-trace21k/
 # Reference: https://cp.copernicus.org/articles/19/439/2023/cp-19-439-2023.html
 #
 # PaleoClim: http://www.paleoclim.org/
@@ -47,6 +47,9 @@
 # Outras variáveis interessantes
 # https://www.earthenv.org/
 # Reference: https://www.nature.com/articles/sdata201840
+
+# Mapbiomas (cobertura e uso do solo)
+# https://brasil.mapbiomas.org/downloads/
 
 # CUIDADO COM VARIÁVEIS QUE PODEM VARIAR MUITO COM O TEMPO (ex: cobertura florestal)
 # Dados bioclimáticos são derivados de medições num intervalo de 30 anos
@@ -89,7 +92,7 @@ g <- expand.grid(model = c("ACCESS-CM2", "HadGEM3-GC31-LL", "MIROC6",
                  time = c("2041-2060","2061-2080"))
 #Criar cluster
 parallel::detectCores() #Ver numero de cores disponiveis
-ncores <- 10 #Determinar numero de cores a serem usados em paralelo
+ncores <- 5 #Determinar numero de cores a serem usados em paralelo
 cl <- parallel::makeCluster(ncores) #Criar um cluster em cada core
 parallel::clusterEvalQ(cl, {library("geodata")}) #Enviar pacotes necessários para cada cluster
 parallel::clusterExport(cl, varlist = c("g")) #Enviar objetos necessários para cada cluster
@@ -109,11 +112,12 @@ parallel::stopCluster(cl) #Fechar cluster
 
 #Outras variáveis baixadas direto do site
 
-# Variáveis de solo:
+# Variáveis de solo (clay e sand)
 # SoilGrids: https://soilgrids.org/
 # Reference: https://soil.copernicus.org/articles/7/217/2021/
 # Para download use: https://files.isric.org/soilgrids/latest/data_aggregated/
-# Para baixar classes de solos mais prováveis, use: 
+
+# Classes de solos mais prováveis: 
 # https://files.isric.org/soilgrids/latest/data/wrb/
 
 # Variáveis topográficas (declive)

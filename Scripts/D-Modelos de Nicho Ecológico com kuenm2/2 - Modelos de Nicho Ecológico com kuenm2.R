@@ -42,8 +42,11 @@
 #' Possibilidade de transformar variáveis brutas em PCA-variáveis de duas
 #' maneiras: externamente ou internamente.
 
+# Remover todos os objetos #
+rm(list = ls())
 
 # Carregar pacotes
+library(RuHere)
 library(kuenm2)
 library(terra)
 library(data.table)
@@ -53,18 +56,18 @@ library(mapview)
 #### Importar variáveis ####
 v <- rast("Variaveis_Neotropico/Presente/Variaveis.tiff")
 
-# Excluir variáveis 08, 09, 18 e 19 por apresentarem variações bruscas
-# Essas variações não são naturais, mas artefatos estatísticos pela maneira como
-# são calculadas
-# https://onlinelibrary.wiley.com/doi/abs/10.1111/aec.13234
-# Identificar posição das variáveis
-id_remove <- which(names(v) %in% c("bio_8", "bio_9", "bio_18", "bio_19"))
-v <- v[[-id_remove]]
-names(v)
+# Selecionar variáveis
+minhas_variaveis <- readRDS("Variaveis_Neotropico/minhas_variaveis.rds")
+minhas_variaveis
 
-#Se for selecionar variaveis, siga esses passos
-#var_to_keep <- c("Nomes das variaveis selecionadas")
-#v <- v[[var_to_keep]]
+# Selecionar variaveis
+v <- v[[minhas_variaveis]]
+plot(v)
+
+# Remover soilType
+# Precisamos corrigir no kuenm2...
+v <- v[[setdiff(names(v), "soilType")]]
+names(v)
 
 #### Araucaria angustifolia ####
 
@@ -78,42 +81,49 @@ sp_model <- file.path("Models/kuenm/", sp)
 dir.create(sp_model, recursive = TRUE)
 
 # Importar registros 
-occ <- fread(file.path("Ocorrencias/", sp, "Check_points/D - Pontos_finais.gz"),
+occ <- fread(file.path(sp_dir, "6-Pontos_rarefeitos.gz"),
              data.table = FALSE)
+
 #Importar M
 # Opções
-list.files(file.path("M_poligonos/", sp), pattern = ".gpkg")
+fs::dir_tree("M_poligonos/")
+
 #Escolha uma das opções
 m_sp <- vect(file.path("M_poligonos/", sp, "m_grinnell.gpkg"))
 
 #Espacializar pontos
-pts <- vect(occ, geom = c(x = "x", #Converte pontos para spatvector
-                          y = "y"), crs = "+init=epsg:4326")
-mapview(m_sp) +
-  mapview(pts, #Converte pontos para spatvector
-        burst = TRUE) #Filtrar por valor da coluna
+pts <- spatialize(occ)
+mapview(m_sp) + mapview(pts)
 
 
 #### Preparar dados ####
 ?prepare_data #Ajuda da função
-sp_swd <- prepare_data(model_type = "glmnet",
-                       occ = occ,
-                       species = sp, x = "x", y = "y",
-                       spat_variables = v,
-                       mask = m_sp,
-                       categorical_variables = "soilType",
-                       do_pca = TRUE, 
-                       deviance_explained = 95,
-                       min_explained = 5, center = TRUE, scale = TRUE,
-                       write_pca = FALSE, output_pca = NULL, nbg = 10000,
-                       kfolds = 4, weights = NULL, min_number = 4,
-                       min_continuous = 2,
-                       features = c("l", "q", "p", "lq", "lqp"),
-                       regm = c(0.1, 1, 3, 5),
-                       include_xy = TRUE,
-                       write_file = FALSE, file_name = NULL,
-                       seed = 42)
 
+#Quantos pixels eu tenho na área acessível
+v_m <- crop(v, m_sp, mask = TRUE) #Cortar variáveis para o M da espécie
+global(v_m[[1]], fun="notNA") #Ver quantidade de pixels que não são NAs
+# Geralmente, um background definido como 10% a 20% dos pontos é suficiente
+nbg <- ceiling(global(v_m$bio_6, fun="notNA") * 0.1) %>% 
+  as.numeric()
+nbg
+
+# Preparar dados
+sp_swd <- prepare_data(algorithm = "maxnet", #Maxnet (maxent) ou GLM
+                       occ = occ, #Tabela com ocorrências
+                       species = sp, #Nome da espécie (opcional)
+                       x = "decimalLongitude", #Coluna em occ com longitude
+                       y = "decimalLatitude", #Coluna em occ com latitude
+                       raster_variables = v, #Variáveis raster
+                       mask = m_sp, #Area acessivel para cortar raster (opcional)
+                       categorical_variables = NULL, #Alguma variável categorica?
+                       do_pca = FALSE, #Fazer PCA das variáveis?
+                       n_background = nbg, #Numero de pontos de background
+                       partition_method = "kfolds", #Método de partição (treino e teste)
+                       n_partitions = 4, #Numero de partições
+                       min_number = 4, #Numero minimo de variáveis em cada modelo candidato
+                       features = c("l", "lq", "lqp"), #Tipo de resposta
+                       r_multiplier = c(0.1, 1, 5), #Regularizadores (geralmente usamos mais)
+                       seed = 42) #Seed para definir partição dos dados
 sp_swd$formula_grid %>% nrow() #Ver numero de modelos candidatos
 View(sp_swd$formula_grid) #Ver formulas de cada modelo candidato
 View(sp_swd$calibration_data) #Ver dados de calibração
@@ -121,45 +131,65 @@ View(sp_swd$calibration_data) #Ver dados de calibração
 #Salvar dados de preparação
 saveRDS(sp_swd, file.path(sp_model, "calibration_data.rds"))
 
-# Ver distribuição espacial de dados de presença e de background/ausência
 
+#### Explorar dados de calibração ####
+
+# Cortar variáveis usando M
 v_m <- crop(v, m_sp, mask = TRUE) #Cortar variáveis para o M da espécie
-pbg <- explore_calibration_geo(data = sp_swd, spat_variables = v_m,
-                               plot = FALSE)
-plot(pbg)
+# Remover variavel categorica
+# v_m <- v_m[[setdiff(names(v_m), "soilType")]]
+# names(v_m)
 
-### Histograma das variáveis em dados de presença e de background/ausência
-explore_calibration_hist(data = sp_swd,
-                         color_background = "#0000FF80",
-                         color_presence = "#FF000080",
-                         mfrow = c(2, 3), 
-                         plot_median = TRUE,
-                         breaks = "Scott")
+# Histogramas dos dados de presença e background
+calib_hist <- explore_calibration_hist(data = sp_swd,
+                                       magnify_occurrences = 2,
+                                       include_m = FALSE)
+# Plot dos histogramas
+plot_explore_calibration(explore_calibration = calib_hist,)
+
+# Ver distribuição espacial de dados de treino e de teste
+part_geo <- explore_partition_geo(data = sp_swd, raster_variables = v_m)
+plot(part_geo$Presence)
+mapview(part_geo$Presence)
+
+# Ver distribuição das partições no espaço ambiental
+part_env <- explore_partition_env(data = sp_swd, 
+                                  raster_variables = v_m,
+                                  use_pca = FALSE,
+                                  variables = c("bio_6", "bio_12"))
+
+
+# Ver se há problemas de extrapolação em alguma das partições
+explore_part <- explore_partition_extrapolation(data = sp_swd)
+View(explore_part$Mop_results)
+# Plotar resultados
+# Triângulos laranjas indicam pontos que estão fora do range dos dados de treino
+# Isso significa que, quando for feito a predição para esse ponto, será uma extrapolação
+plot_explore_partition(explore_part, variables = c("bio_6", "slope"))
+plot_explore_partition(explore_part, variables = c("bio_12", "slope"))
+
 
 #### Calibrar modelos candidatos e selecionar melhores modelos ####
 ?calibration
 
 #Ver numero de cores disponíveis
 parallel::detectCores()
+# Usar 75% dos cores
+ncores <- ceiling(parallel::detectCores() * 0.75)
+ncores
 
 m <- calibration(data = sp_swd,
-                 test_concave = TRUE, #Testar e remover curvas concavas?
+                 error_considered = c(10, 15), #Erro considerado para calcular métricas (pode ser mais de 1)
+                 omission_rate = 15, # Erro considerado para selecionar modelos (apenas 1)
+                 remove_concave = TRUE, #Testar e remover curvas concavas?
                  parallel = TRUE, #Rodar em paralelo (mais rápido quando tem muitos modelos)
-                 ncores = 8, #Definir numero de cores para paralelização
-                 progress_bar = TRUE,
-                 parallel_type = "doSNOW",
-                 return_replicate = TRUE,
-                 omission_rate = c(5, 10), #Thesholds para calcular métricas (pode ser mais de um)
-                 omrat_threshold = 10, #Threshold para selecionar modelos!
-                 allow_tolerance = TRUE,
-                 tolerance = 0.01,
-                 AIC = "ws",
-                 delta_aic = 2,
-                 verbose = TRUE)
+                 ncores = ncores) #Definir numero de cores para paralelização
+
 m
 
 # Ver todas as métricas de todos os modelos candidatos
 View(m$calibration_results$Summary)
+
 # Ver métricas de modelos selecionados
 View(m$selected_models)
 # Resumo da seleção de modelos: indices de modelos removidos e selecionados
@@ -175,20 +205,18 @@ m <- readRDS(file.path(sp_model, "candidate_models.rds"))
 # omission rate ou AIC.
 # Para selecionar modelos com base em outros valores de omission rate, esse valor
 # deve ter sido um dos previamente determinados em omission_rate em calibration()
-new_best_model <- sel_best_models(cand_models = m$calibration_results$Summary,
-                                  model_type = "glmnet",
-                                  test_concave = TRUE,
-                                  omrat_threshold = 5, #Agora 5 ao invés de 10
-                                  allow_tolerance = TRUE,
-                                  tolerance = 0.01,
-                                  AIC = "ws",
-                                  significance = 0.05,
-                                  delta_aic = 10, #Maior valor de deltaAIC: 10 ao invés de 2
-                                  verbose = TRUE)
+new_best_model <- select_models(calibration_results = m,
+                                data = sp_swd,
+                                algorithm  = "maxnet",
+                                compute_proc = TRUE,
+                                remove_concave = TRUE,
+                                omission_rate = 10, #Agora 10 ao invés de 15
+                                delta_aic = 10, #Agora 10 ao invés de 2
+                                verbose = TRUE)
 # Comparar modelos selecionamente previamente (omr = 10 e dAIC = 2) com modelos
-# selecionados agora (omr = 5 e dAIC = 10)
-m$summary$Selected #Modelos selecionados com omr = 10 e dAIC = 2
-new_best_model$summary$Selected #Modelos selecionados com omr = 5 e dAIC = 10
+# selecionados agora (omr = 15 e dAIC = 10)
+m$summary$Selected #Modelos selecionados com omr = 15 e dAIC = 2
+new_best_model$summary$Selected #Modelos selecionados com omr = 10 e dAIC = 10
 
 # Caso queira usar os novos modelos selecionados, substitua os objetos:
 # m$selected_models <- new_best_model$cand_final
@@ -201,18 +229,12 @@ new_best_model$summary$Selected #Modelos selecionados com omr = 5 e dAIC = 10
 # Podemos ajustar os modelos finais usando réplicas ou usando todos os dados de
 # ocorrência em um único modelo (n_replicates = 1)
 
-fm <- fit_selected(calibration_results = m,
-                   n_replicates = 10, #Numero de réplicas
-                   rep_type = "bootstrap", #Método de partição (se n_replicates > 1)
-                   train_portion = 0.75, #Porção de pontos usados como treino (se n_replicates > 1)
-                   write_models = FALSE,
-                   file_name = NULL,
+fm <- fit_selected(calibration_results = m, #Output de calibration()
+                   replicate_method = "kfolds", #Método de partição (se n_replicates > 1)
+                   n_replicates = 4, #Numero de réplicas
                    parallel = TRUE, #Em paralelo?
-                   ncores = 6, #Numero de cores em paralelo
-                   parallelType = "doSNOW",
-                   progress_bar = TRUE,
-                   verbose = TRUE,
-                   seed = 42)
+                   ncores = 4, #Numero de cores em paralelo
+                   seed = 42) #Seed para definir partição dos dados
 fm
 # Alguns objetos resultantes:
 names(fm$Models) #ID dos modelos ajustados
@@ -231,72 +253,101 @@ fm <- readRDS(file.path(sp_model, "fitted_models.rds"))
 ?predict_selected
 
 p <- predict_selected(models = fm, #Modelos finais ajustados
-                      spat_var = v, #Variáveis
-                      mask = m_sp, #Mascara para cortar variaveis, aqui M da espécie
-                      consensus_per_model = TRUE,
-                      consensus_general = TRUE,
-                      consensus = c("median", "range", "mean", "stdev"),
-                      clamping = FALSE, #Clamp valores para minimos e máximos da área de calibração
-                      var_to_clamp = NULL, #Variáveis para fazer clamp
-                      type = "cloglog",
+                      raster_variables = v, #Variáveis
+                      # mask = area_acessivel, #Mascara para cortar variaveis, aqui M da espécie
                       progress_bar = TRUE)
-plot(p$Model_432$Replicates) #Predições de cada réplica
-plot(p$Model_432$Model_consensus) #Consensos das réplicas
-plot(p$General_consensus) #Consensos entre os modelos (se houver mais de um modelo)
+
+plot(p$Model_556$Partitions) #Predições de cada réplica
+plot(p$Model_556$Model_consensus) #Consensos das réplicas
+plot(p$General_consensus$mean) #Consensos entre os modelos (se houver mais de um modelo)
+
+# Vamos usar a area acessivel para delimitar melhor a potencial distribuição da espécie
+# Temos dois jeitos de fazer isso
+# A mais comum, é simplesmente cortar o raster de predições usando a area acessivel como máscara
+p_acessivel <- crop(p$General_consensus$mean, m_sp, mask = TRUE)
+plot(p_acessivel)
 
 #Ver com mapview
-mapview(p$General_consensus$mean) + mapview(pts, cex = 4)
+mapview(p_acessivel, col.regions = pals::brewer.rdylgn(7)) + 
+  mapview(pts, cex = 2.5)
+
+# Outra maneira, é usar a area_acessivel para definir como 0 a adequabilidade de toda área fora da área acessível
+p_acessivel2 <- mask(p$General_consensus$mean, m_sp,
+                     updatevalue = 0)
+plot(c(p$General_consensus$mean,
+       p_acessivel2),
+     main = c("Sem M", "Com M"))
+
+# Essa ultima abordagem é útil quando estamos trabalhando com várias espécies com Ms diferentes
+
+# Quando ajustamos os modelos, definimos uma taxa de erro de 10% (ou 15%)
+# Que significa que toleramos que 10% (ou 15%) dos nossos registros estejam em 
+# condições ambientais que não representam o nicho ocupado pela espécie
+# Podemos usar essa taxa para binarizar os modelos
+# Para isso, usamos o valor de adequabilidade que deixará ~10% dos registros em 
+# pixels inadequados (chamado threshold)
+# Esse valor de threshold é armazenado no output de fit_selected()
+fm$thresholds
+
+# Vamos usar o threshold da média dos consensos
+thr <- fm$thresholds$consensus$mean
+thr
 
 # Mapa binarizado
-p_bin <- (p$General_consensus$mean >= fm$thresholds$consensus$mean) * 1
+p_bin <- (p_acessivel >= thr) * 1 
 plot(p_bin)
 #Ver com mapview
-mapview(p_bin) + mapview(pts, cex = 4)
+mapview(p_bin, col.regions = c("gray", "forestgreen")) + mapview(pts, cex = 4)
 
+#Vamos salvar o mapa binarizado
+writeRaster(p_bin,
+            file.path(sp_model, "Present_binarized.tif"), overwrite = TRUE)
+writeRaster(p_acessivel,
+            file.path(sp_model, "Present_continuous.tif"), overwrite = TRUE)
 #### Curvas de resposta ####
 # Qual o efeito de cada variável sobre a adequabilidade (quando todas as outras
 # variáveis são mantidas constantes em sua média)?
 
 # Ver variáveis disponíveis para curvas de resposta
 sapply(fm$Models, function(x) names(x[[1]]$betas), simplify = FALSE)
-# Além das curvas, o gráfico também mostra os limites da variável na área de 
+# Além das curvas, o gráfico também mostra os limites da variável na área de
 # calibração
 
 # Curvas de respostas considerando todos os modelos
 response_curve(models = fm,
-               variable = "PC1", by_replicates = TRUE)
+               variable = "bio_5")
 response_curve(models = fm,
-               variable = "PC3", by_replicates = TRUE)
+               variable = "bio_6")
 response_curve(models = fm,
-               variable = "PC4", by_replicates = TRUE)
+               variable = "bio_12")
 response_curve(models = fm,
-               variable = "PC5", by_replicates = TRUE)
-# Curvas de resposta por modelo
-response_curve(models = fm, variable = "PC1",
-               modelID = "Model_432", by_replicates = T)
-response_curve(models = fm, variable = "PC4",
-               modelID = "Model_432", by_replicates = T)
+               variable = "bio_15")
+response_curve(models = fm,
+               variable = "sand")
+
 
 # Curvas de resposta de produtos - interação entre duas variáveis
-resp2var(models = fm, modelID = "Model_432",
-         variable1 = "PC1", variable2 = "PC4")
-resp2var(models = fm, modelID = "Model_432",
-         variable1 = "PC1", variable2 = "PC5")
-resp2var(models = fm, modelID = "Model_432",
-         variable1 = "PC3", variable2 = "PC5")
+bivariate_response(models = fm, modelID = "Model_556",
+                   variable1 = "bio_15", variable2 = "bio_12")
+bivariate_response(models = fm, modelID = "Model_556",
+                   variable1 = "bio_5", variable2 = "bio_15")
+bivariate_response(models = fm, modelID = "Model_556",
+                   variable1 = "bio_5", variable2 = "bio_12")
+bivariate_response(models = fm, modelID = "Model_556",
+                   variable1 = "bio_5", variable2 = "sand")
+bivariate_response(models = fm, modelID = "Model_556",
+                   variable1 = "bio_12", variable2 = "sand")
 
 #### Importância das variáveis ####
 ?var_importance
 
-imp <- var_importance(models = fm)
-enmpa::plot_importance(imp)
+imp <- variable_importance(models = fm)
+plot_importance(imp)
+View(imp)
+options(scipen = 999)
 
-
-#### Reduzir predição ####
-
-
-
-
+# Veja mais em:
+browseURL("https://marlonecobos.github.io/kuenm2/")
 
 
 

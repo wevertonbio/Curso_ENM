@@ -1,9 +1,13 @@
 #### Selecionar variáveis ambientais para modelos ####
 
+# Remover todos os objetos #
+rm(list = ls())
+
 # Carregar pacotes
 library(terra)
 library(grinnell)
 library(dplyr)
+library(mapview)
 library(usdm) # Pacote para fazer VIF
 library(ggcorrplot) # Plotar correlações
 library(kuenm2) # Fazer PCA
@@ -19,6 +23,8 @@ v <- rast("Variaveis_Neotropico/Presente/Variaveis.tiff")
 names(v)
 
 # Cortar variáveis pelo M da espécie
+# Escolha uma das opções
+fs::dir_tree("M_poligonos/")
 m <- vect("M_poligonos/Araucaria angustifolia/m_grinnell.gpkg") #Escolha um M
 v <- crop(v, m, mask = TRUE)
 plot(v)
@@ -56,11 +62,12 @@ g_cor <- ggcorrplot(cor_v, #Matriz de correlação
                     legend.title = "Correlation") + #Título da legenda
   theme(legend.position = "right") #Posição da legenda
 g_cor
+
 # Problema de correlação: precisa avaliar variável por variável
 # Vamos determinar um threshold e escolher uma variavel por vez
 thr <- 0.7
 # Começar escolhendo duas variáveis (escolha outras caso prefira)
-var_to_keep <- c("bio_6", "bio_12")
+var_to_keep <- c("bio_6", "bio_15")
 
 # Identificar variaveis que não tem alta correlação (> thr) com variaveis mantidas
 var_without_correlation <- rownames(abs(cor_v)[, var_to_keep])[
@@ -68,12 +75,9 @@ var_without_correlation <- rownames(abs(cor_v)[, var_to_keep])[
 var_without_correlation #Escolha uma dessas e adicione a var_to_keep. Rode até aparecer 0
 
 #Vai atualizando aqui e rode var_without_correlation de novo
-var_to_keep <- c("bio_6", "bio_12", "bio_15", "bio_7", "bio_2", "bio_5",
-                 "slope", "clay") 
+var_to_keep <- c("bio_6", "bio_15", "bio_2", "sand", "bio_5", "slope", "bio_12")
 #Vamos manter essas variáveis
 var_to_keep
-# Copie e cole as variáveis aqui para consultar depois
-# "bio_6"  "bio_12" "bio_15" "bio_2"  "slope"  "clay"
 
 #### VIF ####
 # Uma Variável é usada como resposta e as restantes como preditoras num modelo linear
@@ -113,15 +117,55 @@ vif_step <- vifstep(v, th = 10, #th é o threshold de VIF (< 10)
 vif_step
 vif_step_to_keep <- vif_step@results$Variables
 #Comparar variaveis selecionadas
+var_to_keep
 vif_step_to_keep
-vif_cor_to_keep 
+vif_cor_to_keep
 
 #### PCA ####
+# Uma explicação beeeem grosseira de como PCA é util em análises espaciais
+# Primeiro, vamos convertar as variáveis raster em um data.frame
+df <- as.data.frame(v)
+  
+# utilizar apenas 3 variáveis como exemplo:
+ex <- df[, c("bio_5", "bio_10", "bio_12")]
+# Vamos usar scale para centralizar e deixar as variáveis na mesma "unidade de medida"
+ex <- scale(ex)
+
+# Vamos plotar esses dados em 3 dimensoes
+open3d()
+plot3d(x = ex[,1], y = ex[,2], z = ex[,3],
+       xlab = "bio_5", ylab = "bio_10", zlab = "bio_12", col = "gray50")
+# Qual o eixo que tem maior variação?
+# Tente posicionar o plot de maneira que ele fique mais "largo"...
+# Esse é o primeiro eixo (ou primeiro componente da Análise de Componentes Principais)
+# Perceba que nesse eixo, a variação ocorre principalmente na temperatura (bio_5 e bio_10)
+# Ou seja, o primeiro eixo já resume muito bem duas variáveis!
+
+# Agora, tente encontrar o eixo com a segunda maior variação
+# O segundo maior eixo (ou segundo componente da Análise de Componentes Principais) parece ter mais relação com precipitação (bio_12)
+
+# Uma análise de PCA faz isso: procura os eixos com maior variação
+
+# Lembra que cada ponto desse é um pixel com uma coordenada geográfica
+# Quando projetamos o primeiro componente espacialmente, ao invés do pixel ter 3 valoes (um para bio_5, um para bio_10 e um para bio_12), ele vai adquirir o valor em relação ao eixo 1.
+# Mesma coisa para o componente 2, componente 3, etc
+
+# O PCA vai gerar um numero de componentes igual ao numero de variáveis
+# Se o PCA for feito com 20 variáveis, irá gerar 20 componentes
+
+# Como escolher quantos componentes?
+# Cada eixo explica uma % de variação total dos dados.
+# Exemplo: eixo 1 explica 50%, eixo dois explica 30%, eixo 3 explica 10%...
+# Geralmente, escolhemos os primeiros eixos que juntos explicam 90% ou 95% da variação
+# Em geral, isso dá 4 ou 5 eixos
+
+# Mas vamos fazer o PCA de verdade, sem ser no olhômetro
+
 # Sumariza variáveis em eixos de PCA
 ?perform_pca
-pca_var <- perform_pca(spat_variables = v,
+pca_var <- perform_pca(raster_variables = v,
                        center = TRUE, scale = TRUE, 
-                       deviance_explained = 95, # Seleciona eixos que explicam X% da variância
+                       variance_explained = 95, # Seleciona eixos que explicam X% da variância
                        min_explained = 5) # Minimo que eixo precisa explicar para ser incluido
 plot(pca_var$env) #Plotar eixos selecionados
 
@@ -152,7 +196,7 @@ pca_plot56
 
 #Podemos salvar as PCA-variaveis
 dir.create("PCA_variaveis") # Criar pasta
-writeRaster(pca_var$env, "PCA_variaveis/Variaveis.tif") # Salvar
+writeRaster(pca_var$env, "PCA_variaveis/Variaveis.tif", overwrite = TRUE) # Salvar
 
 # A função perform_pca também permite projetar facilmente o PCA para outros cenários
 # Como as funções do kuenm2 permitem fazer PCA internamente (incluindo projeções),
@@ -162,14 +206,15 @@ writeRaster(pca_var$env, "PCA_variaveis/Variaveis.tif") # Salvar
 # Para projetar PCA, veja o exemplo da função
 ?perform_pca
 
-# Caso queira utilizar variáveis brutas, salve uma dessas opções em um bloco de notas 
-# Ou aqui no script
-#Não esqueça de adicionar soiltype, se achar necessário
-dput(c(var_to_keep, "soilType")) #Variaveis selecionadas por correlação de Pearson
-dput(c(vif_cor_to_keep, "soilType")) #Variaveis selecionadas por VIF-Correlação
-dput(c(vif_step_to_keep, "soilType")) #Variaveis selecionadas por VIF-stepwise
 
-# Minhas variaveis para copiar
-c("bio_12", "bio_15", "bio_2", "bio_6", "bio_7", "sand", "slope", 
-  "soilType")
 
+# Quando formor rodar os modelos, vamos utilizar as variáveis brutas (sem PCA)
+# Escolha uma dessas opções:
+var_to_keep
+vif_cor_to_keep
+vif_step_to_keep
+
+# Se quiser, adicione a variavel de tipo de solo
+minhas_variaveis <- c(var_to_keep, "soilType")
+minhas_variaveis
+saveRDS(minhas_variaveis, "Variaveis_Neotropico/minhas_variaveis.rds")

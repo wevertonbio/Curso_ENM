@@ -41,6 +41,7 @@
 # https://cran.r-project.org/web/packages/rpaleoclim/vignettes/rpaleoclim.html
 
 # Carregar pacotes
+library(RuHere)
 library(terra)
 library(grinnell)
 library(rpaleoclim)
@@ -72,17 +73,21 @@ times <- c("cur", #Current (1979 – 2013)
            "lig") #Pleistocene: Last Interglacial   ca. 130 ka
 
 #### Baixar variáveis ####
-pblapply(times, function(i){
-  try({
-    p <- paleoclim(period = i,
-                   resolution = "10m", #10arc-min of resolution
-                   as = "terra", 
-                   region = neot)
-    #Save variables
-    writeRaster(p, paste0("Variaveis_brutas/paleoclim_10/", i, ".tif"),
-                overwrite = TRUE)
-  }) #End of try
-})
+# Já foi rodado
+# pblapply(times, function(i){
+#   try({
+#     p <- paleoclim(period = i,
+#                    resolution = "10m", #10arc-min of resolution
+#                    as = "terra", 
+#                    region = neot)
+#     #Save variables
+#     writeRaster(p, paste0("Variaveis_brutas/paleoclim_10/", i, ".tif"),
+#                 overwrite = TRUE)
+#   }) #End of try
+# })
+# Ver pasta
+fs::dir_tree("Variaveis_brutas/paleoclim_10/")
+
 
 # Observe que há um intervalo significativo entre o LGM (ca. 21 ka) e o LIG (ca. 130 ka). 
 # Podemos preencher essa lacuna usando o mesmo método empregado pelo Oscillayers.
@@ -111,3 +116,4 @@ oscillayer(current_variables = current_variables,
            overwrite = TRUE,
            progress_bar = TRUE)
 # Veja a pasta "Variaveis_brutas/paleoclim_10"
+fs::dir_tree("Variaveis_brutas/paleoclim_10")

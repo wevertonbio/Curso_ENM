@@ -10,6 +10,7 @@
 # Buffer, ecorregiões e mínimo polígono convexo + buffer
 
 #Carregar pacotes
+library(RuHere)
 library(dplyr) #Manipulação de dataframes e uso do %>%
 library(mapview) #Para visualizar mapa interativo
 library(terra) #Manipulação de dados espaciais
@@ -24,18 +25,13 @@ sp_dir
 #Criar diretório para salvar M
 m_dir <- file.path("M_poligonos/", sp)
 m_dir
-dir.create(m_dir)
+dir.create(m_dir, recursive = TRUE)
 
 # Importar registros 
-occ <- fread(file.path("Ocorrencias/", sp, "Check_points/D - Pontos_finais.gz"),
-             data.table = FALSE)
+occ <- fread(file.path(sp_dir, "6-Pontos_rarefeitos.gz"))
 #Espacializar pontos
-pts <- vect(occ, geom = c(x = "x", #Converte pontos para spatvector
-                          y = "y"), crs = "+init=epsg:4326")
-mapview(pts, #Converte pontos para spatvector
-        burst = TRUE) #Filtrar por valor da coluna
-
-
+pts <- spatialize(occ)
+mapview(pts)
 
 #### Buffer
 m_buffer <- buffer(pts, #Pontos espacializads
@@ -130,3 +126,6 @@ writeVector(m_mpc,
 writeVector(m_mpc_buffer,
             file.path("M_poligonos/", sp, "m_mcp_buffer.gpkg"),
             overwrite = TRUE)
+
+# Ver pasta e arquivos
+fs::dir_tree("M_poligonos/")

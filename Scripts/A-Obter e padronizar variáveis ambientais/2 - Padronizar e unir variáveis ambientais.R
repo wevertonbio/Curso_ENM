@@ -18,6 +18,7 @@
 # - crop(mask = TRUE) para cortar variáveis
 # - aggregate() para agrupar pixels e diminuir resolução (pixel maior)
 # - resample() para diminuir resolução e garantir que variáveis tenham mesma extensão
+# - project() para garantir que variaveis tenham mesmo sistema de coordenadas.
 
 # Carregar pacotes
 library(dplyr) #Manipulação de dataframes e uso do %>%
@@ -62,14 +63,21 @@ plot(wc_neot$bio_12)
 soil <- list.files("Variaveis_brutas/SoilGrids/", full.names = TRUE,
                    pattern = ".tif") #Apenas variáveis .tiff
 soil #Ver arquivos
+#Remover arquivos aux.xml da lista
+soil <- soil[!grepl("aux.xml|SoilType", soil)]
+soil
 soil <- rast(soil)
+# Tentar unir dados de solo com worldclim
+wc_soil <- c(soil, wc_neot) #Erro esperado
+
 #Compare a projeção de soil com do worldclim
 crs(wc_neot) # WGS84 :)
 crs(soil) # Homolosine :(
 res(wc_neot) #0.083 graus :)
 res(soil) #5000 metros :(
 #Vamos reprojetar o raster de solo para wgs84, usando o wc_neot como base
-soil <- project(soil, wc_neot$bio_1, method = "bilinear")
+soil <- project(soil, wc_neot$bio_1, 
+                method = "bilinear")
 soil
 #Ver projeção e resolução
 crs(soil) # WGS84 :)
@@ -87,7 +95,7 @@ new_soil <- focal(soil,
                   w = 3, #Tamanho da janela de preenchimento
                   fun = "mean", #Função para preencher NA
                   na.policy="only") #Preencher somente NA
-mapview(new_soil$clay)
+mapview(new_soil$clay) #Melhorou...
 #Agora, vamos cortar o raster
 soil_neot <- crop(new_soil, neot, mask = TRUE)
 plot(soil_neot)
@@ -98,7 +106,9 @@ names(wc_soil) #Ver variáveis
 #Agora, vamos padronizar a variável de tipo de solo
 soiltype <- rast("Variaveis_brutas/SoilGrids/MostProbable.vrt")
 soiltype
-plot(soiltype) #Tentar plotar
+plot(soiltype) #Tentar plotar...
+# Vai dar erro!
+
 # Variaveis vrt são variáveis virtuais: os arquivos não estão no seu computador,
 # mas sim, na internet
 # Vamos usar a função gdal_utils para construir essa raster virtual no seu 
@@ -114,7 +124,7 @@ gdal_utils(
     "-r", "near", # Define o método de resampling como nearest neighbor
     "-co", "COMPRESS=LZW" #Define o método de compressão
   ))
-#Agora, vamos importar o arquivo correto
+#Agora, vamos importar o arquivo correto gerado
 soiltype <- rast("Variaveis_brutas/SoilGrids/SoilType.tif")
 plot(soiltype)
 #Ver projeção e resolução
@@ -133,12 +143,12 @@ new_soiltype <- focal(soiltype_neot,
                   w = 3, #Tamanho da janela de preenchimento
                   fun = "modal", #Função para preencher NA - Modal é melhor para categoricos
                   na.policy="only") #Preencher somente NA
-mapview(new_soiltype)
+mapview(new_soiltype) #Melhorou
 #Agora, vamos cortar o raster
 soiltype_neot <- crop(new_soiltype, neot, mask = TRUE)
 plot(soiltype_neot)
 #Tentar unir com dados anteriores
-wc_soil_type <- c(wc_soil, soiltype_neot)
+wc_soil_type <- c(wc_soil, soiltype_neot) #Vai dar erro de novo!
 #Erro porque variáveis possuem diferentes extents
 ext(wc_soil) == ext(soiltype_neot) #São iguais?
 ext(wc_soil)
@@ -161,7 +171,7 @@ slope <- rast("Variaveis_brutas/Earthenv_topo/slope_5KMmn_GMTEDmd.tif")
 #Ver projeção e resolução
 crs(slope) # WGS84 :)
 res(slope) #0.041 graus :(  Precisamos fazer um resample
-# Resample (já cortar para mesma area do wc_soil)
+# Resample (já corta para mesma area do wc_soil)
 slope_res <- resample(slope, wc_soil,
                       method = "average") #Média porque é continua
 plot(slope_res)
@@ -175,10 +185,11 @@ names(var_final)
 #Salvar variáveis finais
 #Criar diretorio para salvar variaveis processadas
 dir.create("Variaveis_Neotropico/Presente", recursive = TRUE)
-writeRaster(var_final, "Variaveis_Neotropico/Presente/Variaveis.tiff")
+writeRaster(var_final, "Variaveis_Neotropico/Presente/Variaveis.tiff",
+            overwrite = T)
 
 #Testar se deu certo
-rm(list = ls()) #Limpar objetos
+# rm(list = ls()) #Limpar objetos
 v <- rast("Variaveis_Neotropico/Presente/Variaveis.tiff")
 v
 names(v) #Nomes das variaveis

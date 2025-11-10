@@ -1,81 +1,34 @@
-# Verificação e instalação de pacotes
+# Instalar pacotes (se necessário) #
+#Instalar pacman, que irá conferir os pacotes que necessitam de instalação
+# Se não tiver instalado, irá instalar
+if(!require("pacman")){
+  install.packages("pacman") }
 
-# Instalar pacotes do CRAN (se necessário)
-# Pode aparacer um warning dizendo "there is no package called ...". Ignore esse warning.
-if (!require(terra)) install.packages("terra")
-if (!require(geobr)) install.packages("geobr")
-if (!require(mapview)) install.packages("mapview")
-if (!require(dplyr)) install.packages("dplyr")
-if (!require(geodata)) install.packages("geodata")
-if (!require(ggplot2)) install.packages("ggplot2")
-if (!require(tidyterra)) install.packages("tidyterra")
-if (!require(rnaturalearth)) install.packages("rnaturalearth")
-if (!require(metR)) install.packages("metR")
-if (!require(ggspatial)) install.packages("ggspatial")
-if (!require(pbapply)) install.packages("pbapply")
-if (!require(parallel)) install.packages("parallel")
-if (!require(sf)) install.packages("sf")
-if (!require(rgbif)) install.packages("rgbif")
-if (!require(data.table)) install.packages("data.table")
-if (!require(stringr)) install.packages("stringr")
-if (!require(rnaturalearthdata)) install.packages("rnaturalearthdata")
-if (!require(CoordinateCleaner)) install.packages("CoordinateCleaner")
-if (!require(spThin)) install.packages("spThin")
-if (!require(rpaleoclim)) install.packages("rpaleoclim")
-if (!require(fs)) install.packages("fs")
-if (!require(remotes)) install.packages("remotes")
-if (!require(devtools)) install.packages("devtools")
-if (!require(usdm)) install.packages("usdm")
+#Carregar pacote
+library(pacman)
 
-# Instalar pacotes do github
-# Em todos eles, pode selecionar opção 3 se pedir
-remotes::install_github("wevertonbio/florabr") 
-remotes::install_github("wevertonbio/faunabr")
-remotes::install_github("wevertonbio/grinnell")
-remotes::install_github("jaum20/plantR")
-remotes::install_github("matildabrown/rWCVPdata")
+#Verificar se pacotes estão instalados, e instalar se necessário
+p_load("dplyr", "terra", "ggplot2", "data.table", "tidyterra", "geobr",
+       "geodata", "sf", "rnaturalearth", "metR", "ggspatial", "jsonlite",
+       "rgbif", "BIEN", "florabr", "rWCVP", "stringi", "pbapply", "imager",
+       "red", "rnaturalearth", "rnaturalearthdata", "wdpar", "pals", "scales",
+       "tidyr", "betapart", "parallel", "bamm", "tidyterra", "metR", "ggspatial",
+       "stringr", "CoordinateCleaner", "spThin", "rpaleoclim", "fs", "remotes",
+       "ape", "factoextra", "rgl", "ggcorrplot", "spatstat", "spatialEco",
+       "MetBrewer", "patchwork", "ggpubr", "caretSDM", "faunabr", "gifski",
+       "usdm")
+
+# Se não aparecer nada, significa que todos os pacotes estão instalados!
+
+# Se aparecer algum erro dizendo que não foi possível instalar o pacote porque
+# ele está em uso no R, reinicie o R e tente novamente
+
+# Instalar pacotes direto do github
+remotes::install_github("wevertonbio/kuenm2")
+
+remotes::install_github("wevertonbio/RuHere")
+
 remotes::install_github("sjevelazco/flexsdm")
-remotes::install_github("mcooper/moranfast")
-remotes::install_github("kassambara/factoextra")
 
+remotes::install_github("wevertonbio/grinnell")
 
-#Instalar kuenm2 direto do arquivo
-# Precisa instalar rtools!
-# Descompacte o arquivo kuenm2.rar enviado em anexo
-# pode selecionar opção 3 se pedir
-devtools::install("caminho_para_pasta/kuenm2")
-#caminho_para_pasta é o caminho para a pasta onde você descompactou a pasta
-
-# Teste se todos os pacotes estão carregando (ignore os warnings)
-library(terra)
-library(geobr)
-library(mapview)
-library(florabr)
-library(dplyr)
-library(geodata)
-library(ggplot2)
-library(tidyterra)
-library(rnaturalearth)
-library(metR)
-library(ggspatial)
-library(pbapply)
-library(parallel)
-library(sf)
-library(rgbif)
-library(data.table)
-library(plantR)
-library(stringr)
-library(rnaturalearthdata)
-library(faunabr)
-library(rWCVPdata)
-library(CoordinateCleaner)
-library(spThin)
-library(flexsdm)
-library(moranfast)
-library(grinnell)
-library(rpaleoclim)
-library(fs)
-library(devtools)
-library(factoextra)
-library(kuenm2)
-library(usdm)

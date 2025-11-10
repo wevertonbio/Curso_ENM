@@ -54,7 +54,7 @@ ggplot(data = m_values) +
   ylab(names(v_x))
 
 # Considerando todo neotropico como M, modelo "entenderia" que espécie acessou e
-# tentou colonizar ambientes muito mais frias e muito mais quentes do que ela 
+# tentou colonizar ambientes muito mais frios e muito mais quentes do que ela 
 # realmente teve acesso.
 
 # Já com o M mais restrito (m_mcp), modelo "entenderia" que espécie jamais acessou

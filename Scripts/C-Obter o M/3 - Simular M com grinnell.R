@@ -28,7 +28,12 @@
 # kernel_spread, remover polígonos disjuntos sem ocorrências, adicionar um buffer
 # extra ao redor do M final para tentar abranger todos os pontos.
 
+
+# Remover todos os objetos #
+rm(list = ls())
+
 # Carregar pacotes
+library(RuHere)
 library(grinnell) # Para simular M
 library(data.table) #Importar e salvar tabelas
 library(mapview) #Para visualizar mapa interativo
@@ -49,7 +54,7 @@ periods <- c("lh", "mh", "eh", "yds", "ba", "hs1", "lgm", "30kya", "40kya",
 # https://onlinelibrary.wiley.com/doi/abs/10.1111/aec.13234
 variables <- c("bio_1", "bio_2", "bio_3", "bio_4", "bio_5", "bio_6", "bio_7",
                "bio_10", "bio_11", "bio_12", "bio_13", "bio_14", "bio_15",
-               "bio_16", "bio_17",)
+               "bio_16", "bio_17")
 
 # Determinar pasta onde estão variáveis do passado
 projection_dir <- "Variaveis_brutas/paleoclim_10"
@@ -67,23 +72,25 @@ m_dir
 dir.create(m_dir)
 
 # Importar registros 
-occ <- fread(file.path("Ocorrencias/", sp, "Check_points/D - Pontos_finais.gz"),
+occ <- fread(file.path(sp_dir, "6-Pontos_rarefeitos.gz"),
              data.table = FALSE)
 #Espacializar pontos
-pts <- vect(occ, geom = c(x = "x", #Converte pontos para spatvector
-                          y = "y"), crs = "+init=epsg:4326")
-mapview(pts, #Converte pontos para spatvector
-        burst = TRUE) #Filtrar por valor da coluna
-
+pts <- spatialize(occ)
+mapview(pts)
 
 # Criar grid de combinações de dispersal events and kernel_spread
+# Quanto maior o kernel_spread, mais "longe" a espécie vai
+# Distancia depende da resolução do raster de entrada
+# Dispersal events: quantas vezes a espécie vai se dispersar a cada tempo
+# Vamos testar várias combinações
 comb_grid <- data.frame(dispersal_events = c(1, 5, 10, 15, 20, 25, 30, 35),
                         kernel_spread = c(2, 2, 2, 2, 2, 3, 4, 6))
-
+tibble(comb_grid)
 
 #Run M simulation
 m <- m_simulations(data = occ, #Dataframe com longitude and latitude 
-                   long = "x", lat = "y", #Nomes das colunas com longitude e latitude
+                   #Nomes das colunas com longitude e latitude
+                   long = "decimalLongitude", lat = "decimalLatitude",
                    current_variables = current_variables, # Variaveis do presente
                    variables = variables, #Nome das variaveis para incluir
                    scale = TRUE, #Escalar variáveis ao fazer PCA?
@@ -114,7 +121,14 @@ m <- m_simulations(data = occ, #Dataframe com longitude and latitude
 
 #Resumo dos resultados
 # surplus_m é o número de poligonos disjuntos. Valores maiores que 0 indicam problemas
-# occ_outside é o número de registros que ficaram fora do M. Valores maiores que 0 indicam problemas
+# Espécie pode ter surgido em vários lugares disjuntos? Talvez em áreas invadidas?
+# occ_outside é o número de registros que ficaram fora do M. 
+# Valores maiores que 0 indicam problemas
+# Simulação também ajuda a identificar pontos problemáticos
+# Se ponto está fora do M, isso indica que dificilmente o individuo chegou lá
+# por si só naturalmente
+
+# Ver resultados
 m$summary %>% View()
 
 #Vamos plotar alguns Ms
@@ -130,7 +144,8 @@ plot(m$Combination_2$m_by_scen)
 
 # Vamos gerar um GIF mostrando a simulação de algum M
 gif_dispersion(rasters = m$Combination_2$m_by_event, #Escolher simulação por evento de uma combinação
-               gif_file = "M_poligonos/Araucaria angustifolia/Dispersion_by_event.gif", #Pasta para salvar
+               gif_file = file.path("M_poligonos/", sp, 
+                                    "/Dispersion_by_event.gif"), #Pasta para salvar
                width = 2200,
                height = 1500,
                res = 300,
@@ -144,7 +159,5 @@ m_final <- m$Combination_2$m_final
 writeVector(m_final,
             file.path("M_poligonos/", sp, "m_grinnell.gpkg"),
             overwrite = TRUE)
-
-# Repita o procedimento acima com as espécies Boana albomarginata e depois com Hemitriccus kaempferi
-# Copie o código acima e cole aqui embaixo (ou em outro script) para repetir
-
+# Ver opções disponíveis
+fs::dir_tree("M_poligonos/")

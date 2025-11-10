@@ -152,9 +152,9 @@ p
 #Ver arquivos disponíveis
 list.files(out_dir, recursive = TRUE, full.names = TRUE)
 #Vamos importar alguns rasters para ver
-p_present <- rast("Models//Araucaria angustifolia/Projection_results/Present/Present/Model_432_consensus.tiff")
+p_present <- rast("Models//kuenm/Araucaria angustifolia/Projection_results/Present/Present/Model_16_consensus.tiff")
 plot(p_present)
-p_future <- rast("Models//Araucaria angustifolia/Projection_results/Future/2041-2060/ssp585/HadGEM3-GC31-LL/Model_432_consensus.tiff")
+p_future <- rast("Models//kuenm/Araucaria angustifolia/Projection_results/Future/2061-2080/ssp126/ACCESS-CM2/General_consensus.tiff")
 plot(p_future)
 #Comparar
 plot(c(p_present$mean,
@@ -267,15 +267,15 @@ kmop <- kuenm_mop(data = sp_swd,
 
 #Ver resultados
 # Presente
-mop_present_high <- rast("Models/Araucaria angustifolia/Projection_results/MOP/Present/Present_mop_towards_high_combined.tif")
-mop_present_low<- rast("Models/Araucaria angustifolia/Projection_results/MOP/Present/Present_mop_towards_low_combined.tif")
+mop_present_high <- rast("Models/kuenm/Araucaria angustifolia/Projection_results/MOP/Present/Present_mop_towards_high_combined.tif")
+mop_present_low<- rast("Models/kuenm/Araucaria angustifolia/Projection_results/MOP/Present/Present_mop_towards_low_combined.tif")
 mop_present <- c(mop_present_low, mop_present_high)
 names(mop_present) <- c("Towards low", "Towards high")
 panel(mop_present)
 
 # Futuro
-mop_future_high <- rast("Models/Araucaria angustifolia/Projection_results/MOP/Future/2061-2080/ssp585/ACCESS-CM2_mop_towards_high_combined.tif")
-mop_future_low<- rast("Models/Araucaria angustifolia/Projection_results/MOP/Future/2061-2080/ssp585/ACCESS-CM2_mop_towards_low_combined.tif")
+mop_future_high <- rast("Models/kuenm/Araucaria angustifolia/Projection_results/MOP/Future/2061-2080/ssp585/ACCESS-CM2_mop_towards_high_combined.tif")
+mop_future_low<- rast("Models/kuenm/Araucaria angustifolia/Projection_results/MOP/Future/2061-2080/ssp585/ACCESS-CM2_mop_towards_low_combined.tif")
 mop_future <- c(mop_future_low, mop_future_high)
 names(mop_future) <- c("Towards low", "Towards high")
 panel(mop_future)
