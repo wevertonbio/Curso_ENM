@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Weverton Trindade &amp; Fernanda S. Caron">
+
+<title>RuHere</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="ruhere_workflow_files/libs/clipboard/clipboard.min.js"></script>
+<script src="ruhere_workflow_files/libs/quarto-html/quarto.js"></script>
+<script src="ruhere_workflow_files/libs/quarto-html/popper.min.js"></script>
+<script src="ruhere_workflow_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="ruhere_workflow_files/libs/quarto-html/anchor.min.js"></script>
+<link href="ruhere_workflow_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="ruhere_workflow_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="ruhere_workflow_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="ruhere_workflow_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="ruhere_workflow_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">RuHere</h1>
+<p class="subtitle lead">Obtenção e limpeza de dados de ocorrência usando informações de especialistas</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Weverton Trindade &amp; Fernanda S. Caron </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+
+<style>
+body {
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+h1.title {
+  font-size: 34px;
+  line-height: 1.15;
+  margin-bottom: 0.3em;
+}
+
+h2 {
+  margin-top: 1.8em;
+  padding-top: 0.4em;
+  border-top: 2px solid #eeeeee;
+}
+
+h3 {
+  margin-top: 1.4em;
+}
+
+pre {
+  font-size: 16px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+code {
+  font-size: 0.95em;
+}
+
+table {
+  font-size: 17px;
+}
+
+.talk {
+  border-left: 5px solid #545454;
+  background: #f3f3f3;
+  padding: 0.8em 1em;
+  margin: 1em 0;
+  border-radius: 8px;
+}
+
+.take-home {
+  border-left: 5px solid #238b45;
+  background: #f4fbf5;
+  padding: 0.8em 1em;
+  margin: 1em 0;
+}
+</style>
+<section id="introdução" class="level1">
+<h1>Introdução</h1>
+<p>Dados de <span style="background-color: #fbe798;">ocorrência de espécies</span> são amplamente utilizados em estudos de modelagem de nicho ecológico, macroecologia, biogeografia, conservação da biodiversidade, etc.</p>
+<p>Nas últimas décadas, a disponibilidade desses dados aumentou enormemente graças a repositórios como <strong><em>GBIF</em></strong>, <strong><em>SpeciesLink</em></strong>, <strong><em>BIEN</em></strong> e <strong><em>iDigBio</em></strong>.</p>
+<p>No entanto, esses dados frequentemente apresentam <span style="background-color: #fbe798;">problemas importantes de qualidade</span>, como:</p>
+<ul>
+<li>coordenadas inválidas ou imprecisas;</li>
+<li>inconsistências entre coordenadas e metadados;</li>
+<li>registros duplicados;</li>
+<li>ocorrências fora da distribuição natural da espécie;</li>
+<li>viés amostral espacial e ambiental.</li>
+</ul>
+<p>Além disso, <span style="background-color: #fbe798;">preparar dados de ocorrência</span> costuma ser uma das etapas <strong>mais demoradas e subjetivas</strong> de um estudo.</p>
+<p>O <strong>RuHere</strong> foi desenvolvido para <span style="background-color: #fbe798;">integrar diferentes etapas de obtenção, validação e limpeza de dadosde ocorrência</span> em um único workflow reproduzível dentro do R. Registros potencialmente problemáticos são <strong>marcados</strong> (<em>flagged</em>) e posteriormente <strong>removidos</strong>, permitindo maior transparência e controle por parte do usuário.</p>
+<section id="workflow-do-ruhere" class="level3 talk">
+<h3 class="anchored" data-anchor-id="workflow-do-ruhere">Workflow do RuHere:</h3>
+<ol type="1">
+<li><p><strong>Obtenção de ocorrência das espécies</strong><br>
+Download e integração de registros de diferentes repositórios.</p></li>
+<li><p><strong>Padronização e harmonização dos dados</strong><br>
+Organização de colunas e padronização espacial.</p></li>
+<li><p><strong>Validação usando metadados</strong><br>
+Identificação de inconsistências espaciais e problemas nos registros.</p></li>
+<li><p><strong>Validação usando informações de especialistas</strong><br>
+Comparação com distribuições conhecidas das espécies.</p></li>
+<li><p><strong>Exploração visual e remoção de registros problemáticos</strong><br>
+Resumo, inspeção e filtragem das <em>flags</em>.</p></li>
+<li><p><strong>Exploração e redução do viés amostral</strong><br>
+Thinning geográfico e ambiental.</p></li>
+</ol>
+</section>
+<p>Nesta aula, vamos percorrer esse workflow usando um exemplo simples com <span style="background-color: #fbe798;"><strong><em>Araucaria angustifolia</em></strong></span>.</p>
+</section>
+<section id="preparando-o-ambiente" class="level1">
+<h1>0. Preparando o ambiente</h1>
+<p>Antes de começarmos, vamos instalar os pacotes necessários e organizar os diretórios que serão utilizados ao longo da aula.</p>
+<p>O <strong>RuHere</strong> está disponível no <strong>CRAN</strong> e pode ser instalado como qualquer outro pacote do R:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"RuHere"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ao longo da aula, alguns arquivos serão baixados, incluindo dados de ocorrência e bases com distribuições de especialistas.</p>
+<p>Vamos <strong>definir um diretório específico</strong> para armazenar esses arquivos:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="st">"~/Documents/lab/RuHere/data"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="obtendo-dados-de-ocorrência" class="level1">
+<h1>1. Obtendo dados de ocorrência</h1>
+<p>O RuHere permite obter registros diretamente de diferentes repositórios de biodiversidade, incluindo <strong>GBIF</strong>, <strong>SpeciesLink</strong>, <strong>BIEN</strong> e <strong>iDigBio</strong>.</p>
+<p>Nesta aula, vamos focar nos procedimentos de <span style="background-color: #fbe798;">limpeza e validação</span>. Para isso, vamos primeiramente ver como os dados podem ser obtidos.</p>
+<p>No caso do <strong>GBIF</strong>, primeiro configuramos as credenciais de acesso. Isso precisa ser feito apenas uma vez:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RuHere)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Aqui, você deve substituir cada variável com seus dados</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set_gbif_credentials</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gbif_username =</span> <span class="st">"my_username"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">gbif_email =</span> <span class="st">"my_email@example.com"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">gbif_password =</span> <span class="st">"my_password"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Depois, preparamos a requisição para download, escolhendo o grupo taxonômico:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>gbif_prepared <span class="ot">&lt;-</span> <span class="fu">prepare_gbif_download</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">species =</span> <span class="st">"Araucaria angustifolia"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Em seguida, submetemos a requisição ao GBIF:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gbif_requested <span class="ot">&lt;-</span> <span class="fu">request_gbif</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">gbif_info =</span> gbif_prepared</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Como o download é processado pelo próprio servidor do GBIF, podemos acompanhar seu progresso:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rgbif<span class="sc">::</span><span class="fu">occ_download_wait</span>(gbif_requested)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;&lt;gbif download metadata&gt;&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Status: SUCCEEDED</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   DOI: 10.15468/dl.gvhbey</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Format: DWCA</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Download key: 0035489-260519110011954</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Created: 2026-06-03T20:51:08.380+00:00</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Modified: 2026-06-03T20:52:46.621+00:00</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Download link: https://api.gbif.org/v1/occurrence/download/request/0035489-260519110011954.zip</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Total records: 3291</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Quando o download estiver concluído, importamos os dados para o R:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>occ_gbif <span class="ot">&lt;-</span> <span class="fu">import_gbif</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">request_key =</span> gbif_requested</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Vamos dar uma olhada rápida no resultado:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(occ_gbif)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 25</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   scientificName              acceptedScientificName occurrenceID collectionCode</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;                       &lt;chr&gt;                  &lt;chr&gt;        &lt;chr&gt;         </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Araucaria angustifolia (Be… Araucaria angustifoli… urn:catalog… "ALTA-VP"     </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Araucaria angustifolia (Be… Araucaria angustifoli… https://obs… ""            </span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 Araucaria angustifolia (Be… Araucaria angustifoli… https://www… "Observations"</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 Araucaria angustifolia (Be… Araucaria angustifoli… https://www… "Observations"</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Araucaria angustifolia (Be… Araucaria angustifoli… https://www… "Observations"</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 Araucaria angustifolia (Be… Araucaria angustifoli… https://www… "Observations"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ℹ 21 more variables: catalogNumber &lt;chr&gt;, decimalLongitude &lt;dbl&gt;,</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   decimalLatitude &lt;dbl&gt;, coordinateUncertaintyInMeters &lt;dbl&gt;,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   elevation &lt;dbl&gt;, continent &lt;chr&gt;, countryCode &lt;chr&gt;, stateProvince &lt;chr&gt;,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   municipality &lt;chr&gt;, locality &lt;chr&gt;, verbatimLocality &lt;chr&gt;, year &lt;int&gt;,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   eventDate &lt;chr&gt;, recordedBy &lt;chr&gt;, identifiedBy &lt;chr&gt;, basisOfRecord &lt;chr&gt;,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   occurrenceRemarks &lt;chr&gt;, habitat &lt;chr&gt;, datasetName &lt;chr&gt;,</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   datasetKey &lt;chr&gt;, speciesKey &lt;int&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="outros-conjuntos-de-dados" class="level2">
+<h2 class="anchored" data-anchor-id="outros-conjuntos-de-dados">1.1. Outros conjuntos de dados</h2>
+<p>O mesmo procedimento pode ser aplicado a outras bases de dados suportadas pelo pacote:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>occ_idigbio <span class="ot">&lt;-</span> <span class="fu">get_idigbio</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">species =</span> <span class="st">"Araucaria angustifolia"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>occ_bien <span class="ot">&lt;-</span> <span class="fu">get_bien</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">species =</span> <span class="st">"Araucaria angustifolia"</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Além disso, também podemos obter os dados do <strong>SpeciesLink</strong>, que também há a necessidade de configurar as credenciais associadas à sua conta na plataforma:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_specieslink_credentials</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"my_specieslink_key"</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>occ_specieslink <span class="ot">&lt;-</span> <span class="fu">get_specieslink</span>(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">species =</span> <span class="st">"Araucaria angustifolia"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="padronizando-e-integrando-dados" class="level1">
+<h1>2. Padronizando e integrando dados</h1>
+<p>Depois de obter registros de ocorrência, um dos principais desafios é <span style="background-color: #fbe798;">lidar com a heterogeneidade entre bases de dados</span>.</p>
+<p>Cada repositório pode utilizar nomes de colunas diferentes, formatos distintos para datas e coordenadas, convenções diferentes para metadados, etc.</p>
+<p>Por exemplo, a mesma informação pode aparecer com nomes diferentes dependendo da fonte:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Variável</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>espécie</td>
+<td><code>species</code>, <code>scientificName</code></td>
+</tr>
+<tr class="even">
+<td>latitude</td>
+<td><code>decimalLatitude</code>, <code>lat</code></td>
+</tr>
+<tr class="odd">
+<td>longitude</td>
+<td><code>decimalLongitude</code>, <code>lon</code></td>
+</tr>
+<tr class="even">
+<td>país</td>
+<td><code>country</code>, <code>countryCode</code></td>
+</tr>
+</tbody>
+</table>
+<p>Para resolver isso, o <strong>RuHere</strong> utiliza o padrão <strong>Darwin Core (DwC)</strong>, amplamente usado para padronização de dados de biodiversidade.</p>
+<section id="formatando-colunas" class="level2">
+<h2 class="anchored" data-anchor-id="formatando-colunas">2.1. Formatando colunas</h2>
+<p>A função <code>format_columns()</code> harmoniza nomes de colunas, classes dos dados e codificação de texto:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>occ_gbif_standardized <span class="ot">&lt;-</span> <span class="fu">format_columns</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_gbif,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">metadata =</span> <span class="st">"gbif"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>occ_specieslink_standardized <span class="ot">&lt;-</span> <span class="fu">format_columns</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_specieslink,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">metadata =</span> <span class="st">"specieslink"</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>occ_bien_standardized <span class="ot">&lt;-</span> <span class="fu">format_columns</span>(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_bien,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">metadata =</span> <span class="st">"bien"</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>occ_idigbio_standardized <span class="ot">&lt;-</span> <span class="fu">format_columns</span>(</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_idigbio,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">metadata =</span> <span class="st">"idigbio"</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Depois da padronização, os conjuntos de dados podem ser combinados.</p>
+</section>
+<section id="integrando-múltiplas-fontes" class="level2">
+<h2 class="anchored" data-anchor-id="integrando-múltiplas-fontes">2.2. Integrando múltiplas fontes</h2>
+<p>Depois, os dados podem ser combinados em uma única tabela usando <code>bind_here()</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>occ <span class="ot">&lt;-</span> <span class="fu">bind_here</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  occ_gbif_standardized,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  occ_specieslink_standardized,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  occ_bien_standardized,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  occ_idigbio_standardized</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(occ[, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   record_id                species                          scientificName</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    gbif_1 Araucaria angustifolia Araucaria angustifolia (Bertol.) Kuntze</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    gbif_2 Araucaria angustifolia Araucaria angustifolia (Bertol.) Kuntze</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    gbif_3 Araucaria angustifolia Araucaria angustifolia (Bertol.) Kuntze</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    gbif_4 Araucaria angustifolia Araucaria angustifolia (Bertol.) Kuntze</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    gbif_5 Araucaria angustifolia Araucaria angustifolia (Bertol.) Kuntze</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    gbif_6 Araucaria angustifolia Araucaria angustifolia (Bertol.) Kuntze</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   collectionCode catalogNumber</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1        ALTA-VP         74703</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                             </span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3   Observations     354436339</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4   Observations     363465694</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   Observations     354470887</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6   Observations     354550647</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="validação-usando-metadados" class="level1">
+<h1>3. Validação usando metadados</h1>
+<p>Depois de integrar diferentes bases de dados, o próximo passo é identificar <span style="background-color: #fbe798;">problemas espaciais básicos</span>.</p>
+<p>Mesmo quando os registros parecem corretos, é comum encontrarmos coordenadas inválidas, latitude e longitude invertidas, coordenadas incompatíveis com país ou estado informados, registros próximos a capitais, instituições biológicas ou <em>centroids</em> administrativos ou inconsistências geradas durante a digitalização dos dados.</p>
+<div class="talk">
+<p>Um ponto importante do <strong>RuHere</strong> é que ele <strong>não remove registros automaticamente</strong>.</p>
+<p>Em vez disso, ele adiciona <strong><em>flags</em></strong> <strong>lógicas</strong> (<code>TRUE/FALSE</code>) indicando se cada registro passou ou falhou em determinada verificação.</p>
+</div>
+<section id="padronizando-países-e-estados" class="level2">
+<h2 class="anchored" data-anchor-id="padronizando-países-e-estados">3.1. Padronizando países e estados</h2>
+<p>Antes das verificações espaciais, precisamos garantir que os metadados estejam consistentes.</p>
+<p>Bases diferentes frequentemente utilizam grafias distintas para o mesmo local (<code>Brasil</code>, <code>Brazil</code>, <code>BR</code>, etc.), além de abreviações ou campos ausentes.</p>
+<p>Primeiro, padronizamos países:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="ot">&lt;-</span> <span class="fu">standardize_countries</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">country_column =</span> <span class="st">"country"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lookup_na_country =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">return_dictionary =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A função pode inclusive <span style="background-color: #fbe798;">inferir países ausentes a partir das coordenadas</span>.</p>
+<p>Vamos comparar alguns valores:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_standardized<span class="sc">$</span>country) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [italie]        AR argentina        BI        BO   bolivia </span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         1       160        19         1         6        12</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_standardized<span class="sc">$</span>country_suggested) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; argentina   bolivia    brazil   burundi     chile     china </span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       179        18      5223         1        28         1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>O mesmo pode ser feito para estados e províncias:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="ot">&lt;-</span> <span class="fu">standardize_states</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_standardized,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">state_column =</span> <span class="st">"stateProvince"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">country_column =</span> <span class="st">"country_suggested"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">lookup_na_state =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">return_dictionary =</span> <span class="cn">FALSE</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Agora nossos dados estão mais consistentes e prontos para as primeiras verificações de qualidade espacial.</p>
+</section>
+<section id="coordenadas-problemáticas" class="level2">
+<h2 class="anchored" data-anchor-id="coordenadas-problemáticas">3.2. Coordenadas problemáticas</h2>
+<p>O próximo passo é identificar registros com coordenadas inválidas.</p>
+<p>A função <code>remove_invalid_coordinates()</code> adiciona uma <em>flag</em> indicando registros com coordenadas ausentes, valores impossíveis, `NA`s ou valores vazios:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="ot">&lt;-</span> <span class="fu">remove_invalid_coordinates</span>(occ_standardized)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Vamos ver quantos registros foram considerados válidos:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(occ_standardized)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; List of 2</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ valid  :'data.frame': 5111 obs. of  28 variables:</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ record_id                    : chr [1:5111] "gbif_2346" "specieslink_171" "gbif_3291" "gbif_3215" ...</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ species                      : chr [1:5111] "Araucaria angustifolia" "Araucaria angustifolia" "Araucaria angustifolia" "Araucaria angustifolia" ...</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ scientificName               : chr [1:5111] "Araucaria angustifolia (Bertol.) Kuntze" "Araucaria angustifolia" "Araucaria angustifolia (Bertol.) Kuntze" "Araucaria angustifolia (Bertol.) Kuntze" ...</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ collectionCode               : chr [1:5111] "Observations" "INPA" "Herbario INPA" "Tropicos" ...</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ catalogNumber                : chr [1:5111] "155435454" "53650" "53650" "725259" ...</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ decimalLongitude             : num [1:5111] -54.8 -60 -60 47.5 47.5 ...</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ decimalLatitude              : num [1:5111] -25.14 -2.88 -2.88 -18.93 -18.93 ...</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ coordinateUncertaintyInMeters: num [1:5111] NA NA NA NA NA ...</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ elevation                    : num [1:5111] NA NA 0 1200 NA NA NA NA NA NA ...</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ country                      : chr [1:5111] "PY" "brasil" "BR" "MG" ...</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ country_suggested            : chr [1:5111] "paraguay" "brazil" "brazil" "madagascar" ...</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ country_source               : chr [1:5111] "metadata" "metadata" "metadata" "coords" ...</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ stateProvince                : chr [1:5111] "alto parana" "amazonas" "amazonas" "antananarivo" ...</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ state_suggested              : chr [1:5111] "alto parana" "amazonas" "amazonas" NA ...</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ state_source                 : chr [1:5111] "coords" "metadata" "metadata" NA ...</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ municipality                 : chr [1:5111] "" "Manaus" "" "" ...</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ locality                     : chr [1:5111] "" "Reserva Florestal Adolfo Ducke" "Reserva Florestal Adolfo Ducke, Reserva Florestal Adolfo Ducke." "Tananarive; Tsimbaza Botanical Garden Arboretum." ...</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ year                         : num [1:5111] 2023 1975 1975 1975 1975 ...</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ eventDate                    : chr [1:5111] "2023-03-10T13:22:28" NA "1975" "1975-01-19" ...</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ recordedBy                   : chr [1:5111] "Andreas Berger" "Conceição, PN da" "Mike Hopkins" "Thomas B. Croat" ...</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ identifiedBy                 : chr [1:5111] "Andreas Berger" "Conceição, PN da" "Conceição, P.N. da" "P. Goldblatt" ...</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ basisOfRecord                : chr [1:5111] "HUMAN_OBSERVATION" "Preservedspecimen" "PRESERVED_SPECIMEN" "PRESERVED_SPECIMEN" ...</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ occurrenceRemarks            : chr [1:5111] "" "&lt;nO&gt;Reserva Florestal Adolfo Ducke. Sem informação de habitat. Árvore de 10 m de altura.&lt;/nO&gt;" "" "" ...</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ habitat                      : chr [1:5111] "" NA "" "" ...</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ datasetName                  : chr [1:5111] "iNaturalist research-grade observations" NA "Coleção Botânica, Instituto Nacional de Pesquisas da Amazônia (INPA)" "Tropicos" ...</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ datasetKey                   : chr [1:5111] "50c9509d-22c7-4a22-a47d-8c48425ef4a7" NA "3cc6171e-8c52-4f65-ad7a-32c74e395f29" "7bd65a7a-f762-11e1-a439-00145eb45e9a" ...</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ key                          : chr [1:5111] "2684940" NA "2684940" "2684940" ...</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ data_source                  : chr [1:5111] "gbif" "specieslink" "gbif" "gbif" ...</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ invalid:'data.frame': 834 obs. of  28 variables:</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ record_id                    : chr [1:834] "idigbio_1053" "idigbio_301" "idigbio_384" "idigbio_972" ...</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ species                      : chr [1:834] "Araucaria angustifolia" "Araucaria angustifolia" "Araucaria angustifolia" "Araucaria angustifolia" ...</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ scientificName               : chr [1:834] "Araucaria angustifolia" "Araucaria angustifolia" "Araucaria angustifolia" "Araucaria angustifolia" ...</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ collectionCode               : chr [1:834] "coleção botânica, instituto nacional de pesquisas da amazônia (inpa)" "us" "ncsc" "us" ...</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ catalogNumber                : chr [1:834] "53650" "us 700965" "ncsc00002090" "us 2902787" ...</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ decimalLongitude             : num [1:834] NA NA NA NA NA NA NA NA NA NA ...</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ decimalLatitude              : num [1:834] NA NA NA NA NA NA NA NA NA NA ...</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ coordinateUncertaintyInMeters: num [1:834] NA NA NA NA NA NA NA NA NA NA ...</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ elevation                    : num [1:834] 0 NA NA NA NA NA NA NA NA NA ...</span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ country                      : chr [1:834] "brasil" "paraguay" "brazil" "brazil" ...</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ country_suggested            : chr [1:834] "brazil" "paraguay" "brazil" "brazil" ...</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ country_source               : chr [1:834] "metadata" "metadata" "metadata" "metadata" ...</span></span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ stateProvince                : chr [1:834] "amazonas" "asuncion" "bahia" "bahia" ...</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ state_suggested              : chr [1:834] "amazonas" NA "bahia" "bahia" ...</span></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ state_source                 : chr [1:834] "metadata" NA "metadata" "metadata" ...</span></span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ municipality                 : chr [1:834] NA NA NA NA ...</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ locality                     : chr [1:834] "reserva florestal adolfo ducke, reserva florestal adolfo ducke." "asuncion cult." "planted as an ornamental at an abandoned agricultural research station near maracas." "abandoned agricultural research station near maracas" ...</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ year                         : num [1:834] 1975 NA 1973 1973 1987 ...</span></span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ eventDate                    : chr [1:834] "1975-10-08T00:00:00+00:00" NA "1973-10-06T00:00:00+00:00" "1973-10-07T00:00:00+00:00" ...</span></span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ recordedBy                   : chr [1:834] "mike hopkins" "c.e.o. kuntze" "d. e. cole" "d. e. cole" ...</span></span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ identifiedBy                 : chr [1:834] NA NA NA NA ...</span></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ basisOfRecord                : chr [1:834] "preservedspecimen" "preservedspecimen" "preservedspecimen" "preservedspecimen" ...</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ occurrenceRemarks            : chr [1:834] NA NA NA NA ...</span></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ habitat                      : chr [1:834] NA NA NA NA ...</span></span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ datasetName                  : chr [1:834] NA NA NA NA ...</span></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ datasetKey                   : chr [1:834] "7ddf754f-d193-4cc9-b351-99906754a03b" "7ddf754f-d193-4cc9-b351-99906754a03b" "7ddf754f-d193-4cc9-b351-99906754a03b" "7ddf754f-d193-4cc9-b351-99906754a03b" ...</span></span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ key                          : chr [1:834] NA NA NA NA ...</span></span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   ..$ data_source                  : chr [1:834] "idigbio" "idigbio" "idigbio" "idigbio" ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="verificando-inconsistências-espaciais" class="level2">
+<h2 class="anchored" data-anchor-id="verificando-inconsistências-espaciais">3.3. Verificando inconsistências espaciais</h2>
+<p>Mesmo com coordenadas válidas, ainda podem existir inconsistências.</p>
+<p>Por exemplo, um registro informado como <code>Brasil</code>, mas cujas coordenadas caem na Argentina.</p>
+<p>Primeiro verificamos se as coordenadas correspondem ao país informado:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="ot">&lt;-</span> <span class="fu">check_countries</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_standardized<span class="sc">$</span>valid,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">country_column =</span> <span class="st">"country_suggested"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Quantos registros apresentaram inconsistências?</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_standardized<span class="sc">$</span>correct_country)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   264  4826</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Vamos inspecionar alguns casos problemáticos:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(correct_country <span class="sc">==</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    species,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    country,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    decimalLongitude,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    decimalLatitude</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  species  country decimalLongitude decimalLatitude</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Araucaria angustifolia colombia                0               0</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Araucaria angustifolia colombia                0               0</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 Araucaria angustifolia colombia                0               0</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 Araucaria angustifolia paraguay                0               0</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Araucaria angustifolia paraguay                0               0</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 Araucaria angustifolia paraguay                0               0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Depois fazemos o mesmo para estados ou províncias:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="ot">&lt;-</span> <span class="fu">check_states</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_standardized,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">state_column =</span> <span class="st">"state_suggested"</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Resumo dos resultados:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_standardized<span class="sc">$</span>correct_state)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   199  4725</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="integrando-flags-do-coordinatecleaner" class="level2">
+<h2 class="anchored" data-anchor-id="integrando-flags-do-coordinatecleaner">3.4. Integrando flags do <code>CoordinateCleaner</code></h2>
+<p>Além das verificações implementadas no próprio <strong>RuHere</strong>, também podemos incorporar testes do pacote <code>CoordinateCleaner</code>, amplamente utilizado em estudos de modelagem de nicho ecológico.</p>
+<p>Essas funções ajudam a identificar registros suspeitos próximos de capitais, centróides administrativos, instituições biológicas, áreas urbanas e coordenadas potencialmente problemáticas.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(CoordinateCleaner)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>occ_standardized <span class="ot">&lt;-</span> <span class="fu">clean_coordinates</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> occ_standardized,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">lon =</span> <span class="st">"decimalLongitude"</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lat =</span> <span class="st">"decimalLatitude"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">species =</span> <span class="st">"species"</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="talk">
+<p>Como tanto o <strong>RuHere</strong> quanto o <strong>CoordinateCleaner</strong> utilizam um sistema de <strong><em>flags</em></strong>, seus resultados podem ser integrados facilmente em um mesmo workflow.</p>
+</div>
+</section>
+<section id="explorando-os-registros-no-mapa" class="level2">
+<h2 class="anchored" data-anchor-id="explorando-os-registros-no-mapa">3.5. Explorando os registros no mapa</h2>
+<p>Depois das verificações, podemos visualizar os registros espacialmente.</p>
+<p>Muitas vezes, <span style="background-color: #fbe798;">problemas se tornam muito mais evidentes no mapa do que em tabelas</span>.</p>
+<p>Por exemplo:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  occ_standardized,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">species =</span> <span class="st">"Araucaria angustifolia"</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ou, alternativamente, podemos usar um mapa interativo:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_here</span>(occ_standardized)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="talk">
+<p>A inspeção visual é uma etapa importante do workflow.</p>
+<p>Ela ajuda a decidir quais <em>flags</em> realmente devem ser consideradas na limpeza final e evita remoções excessivamente automáticas.</p>
+</div>
+<p>Até aqui, identificamos inconsistências espaciais usando coordenadas e metadados.</p>
+<p>Mas um registro ainda pode parecer correto e, mesmo assim, estar fora da <span style="background-color: #fbe798;">distribuição biologicamente esperada da espécie</span>.</p>
+<p>É exatamente aí que entram as informações derivadas de especialistas.</p>
+</section>
+</section>
+<section id="validação-usando-dados-de-especialistas" class="level1">
+<h1>4. Validação usando dados de especialistas</h1>
+<p>Até agora, utilizamos coordenadas, metadados e informações associadas aos registros. Mas um registro pode ainda assim <strong>parecer perfeitamente válido</strong> e <strong>ocorrer em um local biologicamente improvável</strong>. Por exemplo, uma espécie endêmica do sul do Brasil aparecendo no Nordeste.</p>
+<p>Nesses casos, informações de <span style="background-color: #fbe798;">distribuição conhecidas por especialistas</span> podem ser extremamente úteis.</p>
+<div class="talk">
+<p>Esse é um dos principais <strong>diferenciais</strong> do <strong>RuHere</strong>.</p>
+<p>O pacote permite <strong>comparar</strong> ocorrências com <strong>distribuições especialistas</strong> provenientes de diferentes bases de dados.</p>
+</div>
+<p>O RuHere atualmente integra informações provenientes de <strong>WCVP</strong> (<em>World Checklist of Vascular Plants</em>), <strong>IUCN</strong>, <strong>BIEN</strong>, <strong>Flora e Funga do Brasil</strong> e <strong>Catálogo Taxonômico da Fauna do Brasil</strong>.</p>
+<section id="baixando-bases-especialistas" class="level2">
+<h2 class="anchored" data-anchor-id="baixando-bases-especialistas">4.1. Baixando bases especialistas</h2>
+<p>Essas bases precisam ser baixadas <strong>apenas uma vez</strong> e podem ser reutilizadas em análises futuras.</p>
+<p>Como <strong><em>Araucaria angustifolia</em></strong> é uma planta nativa do Brasil, podemos verificar se os registros estão dentro da distribuição esperada segundo a <strong>Flora e Funga do Brasil</strong>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>flora_br <span class="ot">&lt;-</span> <span class="fu">florabr_here</span>(<span class="at">data_dir =</span> data_dir)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>occ_flagged <span class="ot">&lt;-</span> <span class="fu">flag_florabr</span>(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_dir =</span> data_dir,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_standardized</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Resumo:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_flagged<span class="sc">$</span>florabr_flag)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4339   772</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Também podemos utilizar a distribuição descrita pela <strong>WCVP</strong>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>wcvp_br <span class="ot">&lt;-</span> <span class="fu">wcvp_here</span>(<span class="at">data_dir =</span> data_dir)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>occ_flagged <span class="ot">&lt;-</span> <span class="fu">flag_wcvp</span>(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_dir =</span> data_dir,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_flagged</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_flagged<span class="sc">$</span>wcvp_flag)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   457  4654</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="consenso-entre-múltiplas-bases" class="level2">
+<h2 class="anchored" data-anchor-id="consenso-entre-múltiplas-bases">4.2. Consenso entre múltiplas bases</h2>
+<p>Uma vantagem do <strong>RuHere</strong> é a possibilidade de <span style="background-color: #fbe798;">combinar múltiplas fontes de informação</span>.</p>
+<p>Por exemplo, podemos considerar um registro válido se ele for aceito por pelo menos uma base, ou exigir concordância entre todas:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>occ_flagged <span class="ot">&lt;-</span> <span class="fu">flag_consensus</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_flagged,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">flags =</span> <span class="fu">c</span>(<span class="st">"florabr"</span>, <span class="st">"wcvp"</span>),</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">consensus_rule =</span> <span class="st">"all_true"</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(occ_flagged[, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">36</span><span class="sc">:</span><span class="dv">49</span>)])</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  species data_source .val  .equ  .zer .cap  .cen  .sea  .otl</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Araucaria angustifolia        gbif TRUE  TRUE  TRUE TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Araucaria angustifolia specieslink TRUE FALSE FALSE TRUE FALSE FALSE FALSE</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 Araucaria angustifolia        gbif TRUE  TRUE  TRUE TRUE  TRUE  TRUE FALSE</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 Araucaria angustifolia        gbif TRUE  TRUE  TRUE TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Araucaria angustifolia        gbif TRUE  TRUE  TRUE TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 Araucaria angustifolia        gbif TRUE  TRUE  TRUE TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   .gbf .inst .summary florabr_flag wcvp_flag consensus_flag</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 TRUE  TRUE     TRUE         TRUE      TRUE           TRUE</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 TRUE  TRUE    FALSE         TRUE     FALSE          FALSE</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 TRUE  TRUE    FALSE         TRUE     FALSE          FALSE</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 TRUE  TRUE     TRUE        FALSE      TRUE          FALSE</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 TRUE FALSE    FALSE        FALSE      TRUE          FALSE</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 TRUE  TRUE     TRUE        FALSE      TRUE          FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="talk">
+<p>Na prática, isso permite um <strong>equilíbrio</strong> entre abordagens mais conservadoras ou mais permissivas de limpeza.</p>
+</div>
+</section>
+</section>
+<section id="visualizando-e-removendo-registros-marcados" class="level1">
+<h1>5. Visualizando e removendo registros marcados</h1>
+<p>Até aqui, identificamos potenciais problemas nos dados usando inconsistências espaciais, metadados e distribuições conhecidas por especialistas.</p>
+<p>Antes de prosseguir para análises ecológicas, é importante explorar os resultados e decidir <strong>quais registros remover</strong>.</p>
+<section id="resumindo-as-flags" class="level2">
+<h2 class="anchored" data-anchor-id="resumindo-as-flags">5.1. Resumindo as flags</h2>
+<p>Podemos observar quantos registros foram marcados por cada procedimento:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>summary_plot <span class="ot">&lt;-</span> <span class="fu">summarize_flags</span>(occ_flagged)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>summary_plot<span class="sc">$</span>plot_summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="visualizando-registros" class="level2">
+<h2 class="anchored" data-anchor-id="visualizando-registros">5.2. Visualizando registros</h2>
+<p>Também podemos explorar visualmente os registros no espaço geográfico:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(occ_flagged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Uma das vantagens do RuHere é justamente permitir uma inspeção <strong>iterativa</strong> dos dados <strong>antes de qualquer remoção</strong>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_here</span>(occ_flagged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="removendo-registros-problemáticos" class="level2">
+<h2 class="anchored" data-anchor-id="removendo-registros-problemáticos">5.3. Removendo registros problemáticos</h2>
+<p>Depois da inspeção, podemos remover registros marcados.</p>
+<p>Por padrão, <code>remove_flagged()</code> considera todas as flags presentes no conjunto de dados:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>occ_clean <span class="ot">&lt;-</span> <span class="fu">remove_flagged</span>(occ_flagged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Vamos comparar o tamanho dos conjuntos:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(occ_flagged)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5111</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(occ_clean)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 326</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Agora temos um conjunto de dados potencialmente mais <strong>adequado</strong> para análises posteriores.</p>
+</section>
+</section>
+<section id="exploração-e-redução-do-viés-amostral" class="level1">
+<h1>6. Exploração e redução do viés amostral</h1>
+<p>Mesmo após remover registros problemáticos, ainda pode existir um problema importante: <span style="background-color: #fbe798;">os registros nem sempre representam igualmente o espaço geográfico ou ambiental</span>.</p>
+<p>Em dados de biodiversidade, é comum encontrarmos regiões intensamente amostradas e outras pouco representadas. Isso geralmente acontece por fatores como proximidade de centros urbanos, facilidade de acesso, maior esforço de coleta em determinadas regiões ou preferência de coletores.</p>
+<p>Como consequência, conjuntos de dados de ocorrência frequentemente apresentam <span style="background-color: #fbe798;">viés amostral</span>.</p>
+<div class="talk">
+<p>Esse tipo de viés pode influenciar fortemente modelagens de nicho ecológico e outras análises espaciais.</p>
+</div>
+<p>O objetivo é <strong>reduzir redundância espacial e ambiental</strong>.</p>
+<section id="explorando-a-distribuição-espacial-dos-registros" class="level2">
+<h2 class="anchored" data-anchor-id="explorando-a-distribuição-espacial-dos-registros">6.1. Explorando a distribuição espacial dos registros</h2>
+<p>Antes de qualquer filtragem, vale observar como os registros estão distribuídos no espaço.</p>
+<p>Podemos visualizar a densidade de registros usando <strong>kernel density estimation (KDE)</strong>:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>heatmap <span class="ot">&lt;-</span> <span class="fu">spatial_kde</span>(occ_clean, <span class="at">resolution =</span> <span class="fl">0.25</span>, <span class="at">buffer_extent =</span> <span class="dv">50</span>, <span class="at">radius =</span> <span class="dv">2</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(<span class="at">occ =</span> occ_clean, <span class="at">size_points =</span> <span class="fl">0.5</span>, <span class="at">heatmap =</span> heatmap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="thinning-geográfico" class="level2">
+<h2 class="anchored" data-anchor-id="thinning-geográfico">6.2. Thinning geográfico</h2>
+<p>Uma estratégia comum para reduzir autocorrelação espacial é remover registros muito próximos.</p>
+<p>No RuHere, isso pode ser feito usando <code>thin_geo()</code>.</p>
+<p>Por exemplo, podemos manter apenas um registro dentro de um raio de 10 km:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>occ_clean_thin <span class="ot">&lt;-</span> <span class="fu">thin_geo</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_clean,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">d =</span> <span class="dv">10</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Vamos verificar quantos registros foram mantidos:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_clean_thin<span class="sc">$</span>thin_geo)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   235    91</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>occ_thin_geo <span class="ot">&lt;-</span> <span class="fu">remove_flagged</span>(<span class="at">occ =</span> occ_clean_thin)</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>heatmap_thin_geo <span class="ot">&lt;-</span> <span class="fu">spatial_kde</span>(<span class="at">occ =</span> occ_thin_geo, <span class="at">resolution =</span> <span class="fl">0.2</span>, </span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>                                <span class="at">buffer_extent =</span> <span class="dv">50</span>, <span class="at">radius =</span> <span class="dv">2</span>, </span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>                                <span class="at">zero_as_NA =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(occ_clean_thin, <span class="at">size_points =</span> <span class="fl">0.5</span>, <span class="at">heatmap =</span> heatmap_thin_geo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="escolhendo-uma-distância-de-thinning" class="level2">
+<h2 class="anchored" data-anchor-id="escolhendo-uma-distância-de-thinning">6.3. Escolhendo uma distância de thinning</h2>
+<p>Mas como escolher uma distância apropriada? Essa decisão costuma ser arbitrária.</p>
+<p>O RuHere implementa uma abordagem baseada em <strong>Moran’s I</strong>, permitindo testar múltiplas distâncias e selecionar uma configuração que reduza autocorrelação espacial.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"worldclim"</span>, <span class="at">package =</span> <span class="st">"RuHere"</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">unwrap</span>(worldclim)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>occ_thin_moran <span class="ot">&lt;-</span> <span class="fu">flag_geo_moran</span>(</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_clean, </span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">d =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">30</span>),</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">env_layers =</span> r</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>occ_thin_geo_moran <span class="ot">&lt;-</span> <span class="fu">remove_flagged</span>(<span class="at">occ =</span> occ_thin_moran<span class="sc">$</span>occ)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>heatmap_thin_geo_moran <span class="ot">&lt;-</span> <span class="fu">spatial_kde</span>(<span class="at">occ =</span> occ_thin_geo_moran, </span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">resolution =</span> <span class="fl">0.2</span>, </span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">buffer_extent =</span> <span class="dv">50</span>, <span class="at">radius =</span> <span class="dv">2</span>,</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">zero_as_NA =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(<span class="at">occ =</span> occ_thin_moran<span class="sc">$</span>occ, <span class="at">size_points =</span> <span class="fl">0.5</span>, <span class="at">heatmap =</span> heatmap_thin_geo_moran)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="talk">
+<p>Na prática, essa função ajuda a evitar escolhas arbitrárias de distância para o thinning.</p>
+</div>
+</section>
+<section id="thinning-ambiental" class="level2">
+<h2 class="anchored" data-anchor-id="thinning-ambiental">6.4. Thinning ambiental</h2>
+<p>Um possível problema do <em>thinning</em> geográfico é que registros próximos no espaço podem, na verdade, representar condições ambientais muito diferentes, especialmente em regiões ambientalmente heterogêneas.</p>
+<p>Nesses casos, remover registros apenas pela proximidade geográfica pode levar à perda de informações importantes sobre o nicho ecológico da espécie.</p>
+<div class="talk">
+<p><strong>Ideia principal:</strong> dois registros podem estar próximos geograficamente, mas ocorrer sob climas bastante diferentes.</p>
+</div>
+<p>Para contornar esse problema, o <strong>RuHere</strong> também permite realizar <em>thinning</em> no <strong>espaço ambiental</strong>.</p>
+<p>Em vez de considerar apenas distância geográfica, essa abordagem remove registros que representam <strong>condições ambientais redundantes</strong>.</p>
+<p>O procedimento funciona criando uma grade multidimensional no espaço ambiental, dividindo cada variável em um número definido de intervalos (<code>n_bins</code>). Registros que caem no mesmo bloco ambiental são considerados muito semelhantes e podem ser marcados como redundantes.</p>
+<section id="entendendo-os-blocos-ambientais" class="level3">
+<h3 class="anchored" data-anchor-id="entendendo-os-blocos-ambientais">6.4.1. Entendendo os blocos ambientais</h3>
+<p>Para visualizar como essa discretização funciona, podemos criar os blocos ambientais usando <code>get_env_bins()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">get_env_bins</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thin_moran<span class="sc">$</span>occ,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">env_layers =</span> r,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_bins =</span> <span class="dv">10</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(b<span class="sc">$</span>data)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   bio_1 bio_7 bio_12 bio_1_bin bio_7_bin bio_12_bin block_id</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    NA    NA     NA        NA        NA         NA     &lt;NA&gt;</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    NA    NA     NA        NA        NA         NA     &lt;NA&gt;</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    NA    NA     NA        NA        NA         NA     &lt;NA&gt;</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    NA    NA     NA        NA        NA         NA     &lt;NA&gt;</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    NA    NA     NA        NA        NA         NA     &lt;NA&gt;</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    NA    NA     NA        NA        NA         NA     &lt;NA&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>O objeto retornado contém, para cada registro, o bloco ambiental ao qual ele pertence.</p>
+<p>Também podemos visualizar como os registros são distribuídos para duas variáveis ambientais:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_env_bins</span>(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  b,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_var =</span> <span class="st">"bio_1"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_var =</span> <span class="st">"bio_12"</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Temperature"</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Precipitation"</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Nesse gráfico, registros dentro do mesmo bloco representam combinações ambientais semelhantes e, portanto, podem conter informação redundante.</p>
+</section>
+<section id="aplicando-o-thinning-ambiental" class="level3">
+<h3 class="anchored" data-anchor-id="aplicando-o-thinning-ambiental">6.4.2. Aplicando o thinning ambiental</h3>
+<p>Agora podemos marcar registros redundantes usando <code>thin_env()</code>.</p>
+<p>Neste exemplo, usamos <code>n_bins = 10</code> e priorizamos registros mais recentes usando o ano de coleta.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>occ_thin_env <span class="ot">&lt;-</span> <span class="fu">thin_env</span>(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thin_moran<span class="sc">$</span>occ,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">env_layers =</span> r,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_bins =</span> <span class="dv">10</span>,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">prioritary_column =</span> <span class="st">"year"</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_thin_env<span class="sc">$</span>thin_env)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   255    71</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Depois, podemos remover os registros marcados e visualizar o padrão espacial resultante.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>occ_thinned_env <span class="ot">&lt;-</span> <span class="fu">remove_flagged</span>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thin_env</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>heatmap_thin_env <span class="ot">&lt;-</span> <span class="fu">spatial_kde</span>(</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thinned_env,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">resolution =</span> <span class="fl">0.2</span>,</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">buffer_extent =</span> <span class="dv">50</span>,</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">radius =</span> <span class="dv">2</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thin_env,</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">size_points =</span> <span class="fl">0.5</span>,</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">heatmap =</span> heatmap_thin_env</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="talk">
+<p>O padrão espacial após o <em>thinning</em> ambiental pode ser bastante diferente daquele obtido apenas com distância geográfica.</p>
+</div>
+</section>
+<section id="escolhendo-o-número-de-bins" class="level3">
+<h3 class="anchored" data-anchor-id="escolhendo-o-número-de-bins">6.4.3. Escolhendo o número de bins</h3>
+<p>Assim como no <em>thinning</em> geográfico precisamos escolher uma distância, no <em>thinning</em> ambiental precisamos definir o número de blocos (<code>n_bins</code>).</p>
+<p>Valores maiores geram uma divisão mais refinada do espaço ambiental, reduzindo a chance de registros serem considerados redundantes.</p>
+<p>O <strong>RuHere</strong> permite testar diferentes valores automaticamente usando <strong>Moran’s I</strong>, buscando reduzir autocorrelação espacial sem remover registros excessivamente.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>occ_env_moran <span class="ot">&lt;-</span> <span class="fu">flag_env_moran</span>(</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thin_moran<span class="sc">$</span>occ,</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_bins =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">70</span>, <span class="dv">80</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">prioritary_column =</span> <span class="st">"year"</span>,</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">env_layers =</span> r</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Os resultados incluem estatísticas de autocorrelação e o número de registros retidos em cada cenário:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>occ_env_moran<span class="sc">$</span>imoran</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   species n_bins     bio_1     bio_7    bio_12 median_moran</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  Araucaria angustifolia      5 0.1792696 0.4649643 0.3241674    0.3241674</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10 Araucaria angustifolia     10 0.2682223 0.5070571 0.4051269    0.4051269</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20 Araucaria angustifolia     20 0.3131309 0.5636079 0.4504037    0.4504037</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 30 Araucaria angustifolia     30 0.3488478 0.5655392 0.4637518    0.4637518</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40 Araucaria angustifolia     40 0.3453167 0.5634762 0.4614415    0.4614415</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50 Araucaria angustifolia     50 0.3450936 0.5630945 0.4612638    0.4612638</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 60 Araucaria angustifolia     60 0.3450936 0.5630945 0.4612638    0.4612638</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 70 Araucaria angustifolia     70 0.3453167 0.5634762 0.4614415    0.4614415</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 80 Araucaria angustifolia     80 0.3453167 0.5634762 0.4614415    0.4614415</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    mean_moran min_moran max_moran n_filtered all_records prop_lost</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5   0.3228004 0.1792696 0.4649643         39         326 0.8803681</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10  0.3934688 0.2682223 0.5070571         71         326 0.7822086</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20  0.4423808 0.3131309 0.5636079         94         326 0.7116564</span></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 30  0.4593796 0.3488478 0.5655392         99         326 0.6963190</span></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 40  0.4567448 0.3453167 0.5634762        101         326 0.6901840</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50  0.4564840 0.3450936 0.5630945        100         326 0.6932515</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 60  0.4564840 0.3450936 0.5630945        100         326 0.6932515</span></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 70  0.4567448 0.3453167 0.5634762        101         326 0.6901840</span></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 80  0.4567448 0.3453167 0.5634762        101         326 0.6901840</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Também podemos verificar o valor selecionado:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>occ_env_moran<span class="sc">$</span>n_bins</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "20"</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(occ_env_moran<span class="sc">$</span>occ<span class="sc">$</span>thin_env)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FALSE  TRUE </span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   232    94</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="combinando-thinning-geográfico-e-ambiental" class="level3">
+<h3 class="anchored" data-anchor-id="combinando-thinning-geográfico-e-ambiental">6.4.4. Combinando thinning geográfico e ambiental</h3>
+<p>As duas abordagens possuem vantagens e limitações.</p>
+<p>O <em>thinning</em> geográfico pode remover registros ambientalmente únicos. Já o <em>thinning</em> ambiental pode eliminar registros geograficamente importantes.</p>
+<p>Por isso, uma estratégia interessante é combinar ambas usando <code>flag_consensus()</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>occ_thinned <span class="ot">&lt;-</span> <span class="fu">flag_consensus</span>(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_env_moran<span class="sc">$</span>occ,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">flags =</span> <span class="fu">c</span>(</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"thin_geo"</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"thin_env"</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">consensus_rule =</span> <span class="st">"any_true"</span>,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">flag_name =</span> <span class="st">"thin_geo_env"</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Depois, podemos visualizar os registros marcados:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggmap_here</span>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">occ =</span> occ_thinned</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ruhere_workflow_files/figure-html/unnamed-chunk-51-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="talk">
+<p>Na prática, combinar critérios geográficos e ambientais pode ajudar a equilibrar representatividade espacial e diversidade ambiental.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="considerações-finais" class="level1">
+<h1>Considerações finais</h1>
+<p>Ao longo desta aula, percorremos um workflow completo para:</p>
+<ol type="1">
+<li>obter registros de ocorrência;</li>
+<li>padronizar e integrar diferentes bases;</li>
+<li>identificar inconsistências espaciais;</li>
+<li>validar registros usando informações de especialistas;</li>
+<li>visualizar e remover registros problemáticos;</li>
+<li>reduzir viés amostral espacial e ambiental.</li>
+</ol>
+<p>O <strong>RuHere</strong> busca oferecer um fluxo de trabalho:</p>
+<ul>
+<li>reproduzível;</li>
+<li>transparente;</li>
+<li>flexível;</li>
+<li>centrado na inspeção iterativa dos dados.</li>
+</ul>
+<p>Mais do que remover registros automaticamente, a proposta do pacote é auxiliar pesquisadores a tomarem decisões mais informadas durante a preparação de dados de ocorrência.</p>
+<div class="take-home">
+<p><strong>Mensagem principal:</strong> dados de ocorrência raramente vêm prontos para análise.</p>
+<p>Investir tempo em validação e inspeção geralmente melhora substancialmente a qualidade das inferências ecológicas e biogeográficas.</p>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
